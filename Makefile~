@@ -1,6 +1,6 @@
 obj-m	:= e1000_main.o
 
-KERNELDIR ?= ~/linux-3.17.4/
+KERNELDIR ?= /lib/modules/3.17.4/build
 pwd	  := $(shell pwd)
 
 all:
