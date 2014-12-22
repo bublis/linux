@@ -33,7 +33,7 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	if (err)
 		goto err_pci_reg;
 
-	ioaddr = pci_ioremap_bar(pdev, 0);				//переназначает физический диапазон адресов в ioaddr
+	ioaddr = pci_ioremap_bar(pdev, 0);				//отображает память устройства в физической памяти
 	if (!ioaddr)
 		goto err_ioremap;
 	reg = readl(ioaddr + 0x0038);
@@ -56,9 +56,9 @@ static void remove(struct pci_dev *pdev)
 
 static struct pci_driver pci_driver = { //Структура PCI драйвера
 	.name = "pci_skel",		//имя драйвера
-	.id_table = e1000_pci_tbl,	//134
-	.probe = probe,			//вызывает функцию probe
-	.remove = remove,		//вызывает функцию remove
+	.id_table = e1000_pci_tbl,	//заносит vendor_id и device_id в таблицу. при появлении устройства на шине произойдет вызов probe
+	.probe = probe,			//указатель на функцию probe
+	.remove = remove,		//указатель на функцию remove
 };
 
 static int __init pci_skel_init(void)
