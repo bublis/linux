@@ -24,16 +24,16 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	
 	int err;
 
-	bars = pci_select_bars(pdev, IORESOURCE_MEM | IORESOURCE_IO);
-	err = pci_enable_device(pdev);
+	bars = pci_select_bars(pdev, IORESOURCE_MEM | IORESOURCE_IO);   //
+	err = pci_enable_device(pdev);					//включение устройства
 	if (err)
 		return err;
 
-	err = pci_request_selected_regions(pdev, bars, e1000_driver_name);
+	err = pci_request_selected_regions(pdev, bars, e1000_driver_name); //резервирует регионы памяти
 	if (err)
 		goto err_pci_reg;
 
-	ioaddr = pci_ioremap_bar(pdev, 0);
+	ioaddr = pci_ioremap_bar(pdev, 0);				//переназначает физический диапазон адресов в ioaddr
 	if (!ioaddr)
 		goto err_ioremap;
 	reg = readl(ioaddr + 0x0038);
@@ -42,7 +42,7 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	return 0;
 
 err_ioremap:
-	pci_release_selected_regions(pdev, bars);
+	pci_release_selected_regions(pdev, bars);  	//освобождает регионы памяти
 err_pci_reg:
 	pci_disable_device(pdev);
 	return err;
@@ -50,30 +50,30 @@ err_pci_reg:
 
 static void remove(struct pci_dev *pdev)
 {
-	pci_release_selected_regions(pdev, bars);
-	pci_disable_device(pdev);
+	pci_release_selected_regions(pdev, bars); //освобождение памяти которое занимало устройство
+	pci_disable_device(pdev);		  //отключение устройства
 }
 
-static struct pci_driver pci_driver = {
-	.name = "pci_skel",
-	.id_table = e1000_pci_tbl,
-	.probe = probe,
-	.remove = remove,
+static struct pci_driver pci_driver = { //Структура PCI драйвера
+	.name = "pci_skel",		//имя драйвера
+	.id_table = e1000_pci_tbl,	//134
+	.probe = probe,			//вызывает функцию probe
+	.remove = remove,		//вызывает функцию remove
 };
 
 static int __init pci_skel_init(void)
 {
 	printk("itstalled e1000_main\n");
-	return pci_register_driver(&pci_driver);
+	return pci_register_driver(&pci_driver); //регистрирует драйвер в ядре PCI
 }
 
 static void __exit pci_skel_exit(void)
 {
 	printk("removed e1000_main\n");
-	pci_unregister_driver(&pci_driver);
+	pci_unregister_driver(&pci_driver); //выгружает драйвер в ядре PCI
 }
 
-MODULE_LICENSE("GPL");
+MODULE_LICENSE("GPL"); //говорит модулю какую лицензию использует модуль, без него модуль напишит предупреждение
 
-module_init(pci_skel_init);
-module_exit(pci_skel_exit);
+module_init(pci_skel_init); //функции используют пространство (макросы) ядра
+module_exit(pci_skel_exit); //для установки и удаления модуля
