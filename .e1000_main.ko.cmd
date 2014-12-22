@@ -1,1 +1,0 @@
-cmd_/home/babu/drivers/lab2/e1000_main.ko := ld -r -m elf_i386 -T ./scripts/module-common.lds --build-id  -o /home/babu/drivers/lab2/e1000_main.ko /home/babu/drivers/lab2/e1000_main.o /home/babu/drivers/lab2/e1000_main.mod.o
