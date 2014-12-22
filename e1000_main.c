@@ -63,13 +63,13 @@ static struct pci_driver pci_driver = {
 
 static int __init pci_skel_init(void)
 {
-	printk("itstalled e100_main\n");
+	printk("itstalled e1000_main\n");
 	return pci_register_driver(&pci_driver);
 }
 
 static void __exit pci_skel_exit(void)
 {
-	printk("removed e100_main\n");
+	printk("removed e1000_main\n");
 	pci_unregister_driver(&pci_driver);
 }
 

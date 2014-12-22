@@ -1,4 +1,3 @@
- 
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/pci.h>
@@ -20,10 +19,10 @@ static int bars;
 
 static int probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 {
-	u8 __iomem *hw_addr;
-	unsigned int mac[6];
+	u8 __iomem *ioaddr;
+	unsigned int reg;
 	
-	int err, i;
+	int err;
 
 	bars = pci_select_bars(pdev, IORESOURCE_MEM | IORESOURCE_IO);
 	err = pci_enable_device(pdev);
@@ -34,15 +33,11 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	if (err)
 		goto err_pci_reg;
 
-	hw_addr = pci_ioremap_bar(pdev, 0);
-	if (!hw_addr)
+	ioaddr = pci_ioremap_bar(pdev, 0);
+	if (!ioaddr)
 		goto err_ioremap;
-	for (i = 0; i < 6; i++)
-		mac[i] = readb(hw_addr);
-
-	printk("mac=");
-	for (i = 0; i < 6; i++)
-		printk("%x:", mac[i]);
+	reg = readl(ioaddr + 0x0038);
+	printk("%x\n", reg);
 
 	return 0;
 
@@ -55,9 +50,6 @@ err_pci_reg:
 
 static void remove(struct pci_dev *pdev)
 {
-	/* clean up any allocated resources and stuff here.
-	 * like call release_region();
-	 */
 	pci_release_selected_regions(pdev, bars);
 	pci_disable_device(pdev);
 }
@@ -84,4 +76,4 @@ static void __exit pci_skel_exit(void)
 MODULE_LICENSE("GPL");
 
 module_init(pci_skel_init);
-module_exit(pci_skel_exit); 
+module_exit(pci_skel_exit);
