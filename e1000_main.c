@@ -23,26 +23,29 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	unsigned int reg;
 	
 	int err;
-
-	bars = pci_select_bars(pdev, IORESOURCE_MEM | IORESOURCE_IO);   //
-	err = pci_enable_device(pdev);					//включение устройства
+	/* создает маску BAR из типов ресурсов */
+	bars = pci_select_bars(pdev, IORESOURCE_MEM | IORESOURCE_IO);
+	/* инициализация устройства */
+	err = pci_enable_device(pdev);
 	if (err)
 		return err;
-
-	err = pci_request_selected_regions(pdev, bars, e1000_driver_name); //резервирует регионы памяти
+	/* резервирует регионы памяти */
+	err = pci_request_selected_regions(pdev, bars, e1000_driver_name);
 	if (err)
 		goto err_pci_reg;
-
-	ioaddr = pci_ioremap_bar(pdev, 0);				//отображает память устройства в физической памяти
+	/* отображает память устройства в виртуальной памяти */
+	ioaddr = pci_ioremap_bar(pdev, 0);	
 	if (!ioaddr)
 		goto err_ioremap;
-	reg = readl(ioaddr + 0x0038);
+	/* чтение 4 байт из BAR0 со смещением 0x0038 */
+	reg = readl(ioaddr + 0x0038);		
 	printk("%x\n", reg);
 
 	return 0;
 
 err_ioremap:
-	pci_release_selected_regions(pdev, bars);  	//освобождает регионы памяти
+	/* освобождает регионы памяти */
+	pci_release_selected_regions(pdev, bars);
 err_pci_reg:
 	pci_disable_device(pdev);
 	return err;
@@ -50,21 +53,30 @@ err_pci_reg:
 
 static void remove(struct pci_dev *pdev)
 {
-	pci_release_selected_regions(pdev, bars); //освобождение памяти которое занимало устройство
-	pci_disable_device(pdev);		  //отключение устройства
+	/* освобождение памяти которое занимало устройство и отключение устройства */
+	pci_release_selected_regions(pdev, bars);
+	pci_disable_device(pdev);
 }
 
-static struct pci_driver pci_driver = { //Структура PCI драйвера
-	.name = "pci_skel",		//имя драйвера
-	.id_table = e1000_pci_tbl,	//заносит vendor_id и device_id в таблицу. при появлении устройства на шине произойдет вызов probe
-	.probe = probe,			//указатель на функцию probe
-	.remove = remove,		//указатель на функцию remove
+/*
+ * Структура PCI драйвера
+ * name		имя драйвера
+ * id_table	таблица vendor_id/device_id. при появлении устройства на шине произойдет вызов probe
+ * probe	указатель на функцию remove
+ * remove	указатель на функцию probe
+ */
+static struct pci_driver pci_driver = { 
+	.name = "pci_skel",	
+	.id_table = e1000_pci_tbl,
+	.probe = probe,		
+	.remove = remove,	
 };
 
 static int __init pci_skel_init(void)
 {
 	printk("itstalled e1000_main\n");
-	return pci_register_driver(&pci_driver); //регистрирует драйвер в ядре PCI
+	/* регистрирует драйвер в ядре PCI */
+	return pci_register_driver(&pci_driver);
 }
 
 static void __exit pci_skel_exit(void)
@@ -72,8 +84,8 @@ static void __exit pci_skel_exit(void)
 	printk("removed e1000_main\n");
 	pci_unregister_driver(&pci_driver); //выгружает драйвер в ядре PCI
 }
-
-MODULE_LICENSE("GPL"); //говорит модулю какую лицензию использует модуль, без него модуль напишит предупреждение
-
-module_init(pci_skel_init); //функции используют пространство (макросы) ядра
-module_exit(pci_skel_exit); //для установки и удаления модуля
+/* говорит модулю какую лицензию использует модуль, без него модуль напишит предупреждение */
+MODULE_LICENSE("GPL");
+/* функции используют пространство (макросы) ядра для установки и удаления модуля */
+module_init(pci_skel_init);
+module_exit(pci_skel_exit);
